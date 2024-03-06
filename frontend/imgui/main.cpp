@@ -11,6 +11,7 @@
 #endif
 
 #include <bus/bus.h>
+#include <cpu/cpu.h>
 
 int main(int, char**)
 {
@@ -22,6 +23,8 @@ int main(int, char**)
 	}
 
 	Bus *bus = new Bus();
+	Cpu *cpu = new Cpu(bus);
+
 
 	// Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -75,7 +78,7 @@ int main(int, char**)
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// Our state
-	bool show_another_window = false;
+	bool cpu_reg_debug_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	// Main loop
@@ -97,31 +100,44 @@ int main(int, char**)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
+		IGFD::FileDialogConfig config; config.path = ".";
+
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Open BIOS", ""))
+				{
+					ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".*,.cpp,.h,.hpp", config);
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Debug"))
+			{
+				static bool menu_toggle_cpu_reg_window = false;
+
+				ImGui::MenuItem("CPU Registers", "", &menu_toggle_cpu_reg_window, true);
+
+				// Check the status of the menu item and act accordingly
+				if (menu_toggle_cpu_reg_window)
+				{
+					cpu_reg_debug_window = true;
+				}
+				else
+				{
+					cpu_reg_debug_window = false;
+				}
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+		}
 
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
 		{
-			static float f = 0.0f;
-			static int counter = 0;
-
-			IGFD::FileDialogConfig config; config.path = ".";
 			bool isButtonEnabled = true;
-
-			// Menu Bar
-			if (ImGui::BeginMainMenuBar())
-			{
-				if (ImGui::BeginMenu("File"))
-				{
-					if (ImGui::MenuItem("Open BIOS", "Ctrl+O"))
-					{
-						ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".*,.cpp,.h,.hpp", config);
-					}
-					ImGui::EndMenu();
-				}
-
-				// Add more menus here if needed
-
-				ImGui::EndMainMenuBar();
-			}
 
 			ImGui::Begin("Pawstation debug");
 
@@ -142,6 +158,55 @@ int main(int, char**)
 			}
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+			ImGui::End();
+		}
+
+		if (cpu_reg_debug_window)
+		{
+			ImGui::Begin("CPU Registers", &cpu_reg_debug_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+			                                                        // Display the general-purpose registers
+			ImGui::Text("General-Purpose Registers:");
+
+			const int numColumns = 4;  // Adjust the number of columns as needed
+			const float columnWidth = 150.0f;  // Adjust the column width as needed
+
+			ImGui::Columns(numColumns, nullptr, false);
+
+			for (int i = 0; i < 32; ++i)
+			{
+				ImGui::Text("%s:", cpu->cpu_register_names[i].c_str());
+				ImGui::NextColumn();
+				ImGui::Text("0x%08X", cpu->registers[i]);
+				ImGui::NextColumn();
+			}
+
+			ImGui::Columns(1);  // Reset to a single column layout
+
+			// Display the COP0 registers
+			ImGui::Separator();
+			ImGui::Text("COP0 Registers:");
+
+			ImGui::Columns(numColumns, nullptr, false);
+
+			for (int i = 0; i < 32; ++i)
+			{
+				// Skip printing if the register name is "Reserved"
+				if (cpu->cop0_register_names[i] != "Reserved")
+				{
+					ImGui::Text("%s:", cpu->cop0_register_names[i].c_str());
+					ImGui::NextColumn();
+					ImGui::Text("0x%08X", cpu->cop0_registers[i]);
+					ImGui::NextColumn();
+				}
+			}
+
+			ImGui::Columns(1);  // Reset to a single column layout
+
+			// Display other relevant information as needed
+			ImGui::Separator();
+			ImGui::Text("Program Counter (PC): 0x%08X", cpu->pc);
+			ImGui::Text("Next Program Counter (Next PC): 0x%08X", cpu->next_pc);
+
 			ImGui::End();
 		}
 

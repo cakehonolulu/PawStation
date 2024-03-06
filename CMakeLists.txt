@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.26)
 project(pawstation)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 # Option to choose the frontend (default: ImGui)
 option(USE_IMGUI_FRONTEND "Use ImGui frontend" ON)
