@@ -16,3 +16,7 @@ cmake-build-debug
 modules.xml
 vcs.xml
 .idea/
+
+# Pawstation
+*.bin
+pawstation
