@@ -20,6 +20,7 @@ endif()
 # Specify the main executable
 add_executable(pawstation)
 
+add_subdirectory(src)
 add_subdirectory(frontend)
 
 # Set include directories for the main executable
