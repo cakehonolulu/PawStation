@@ -17,9 +17,9 @@ void Bus::fmem_init()
 	for (auto pageIndex = 0; pageIndex < 128; pageIndex++)
 	{
 		const auto pointer = (uintptr_t)&bios[(pageIndex * PAGE_SIZE)]; // pointer to page #pageIndex of the BIOS
-		address_space_r[pageIndex + 0x1FC00] = pointer;                 // map this page to KUSEG BIOS
-		address_space_r[pageIndex + 0x9FC00] = pointer;                 // Same for KSEG0
-		address_space_r[pageIndex + 0xBFC00] = pointer;                 // Same for KSEG1
+		address_space_r[pageIndex + 0x1FC0] = pointer;                 // map this page to KUSEG BIOS
+		address_space_r[pageIndex + 0x9FC0] = pointer;                 // Same for KSEG0
+		address_space_r[pageIndex + 0xBFC0] = pointer;                 // Same for KSEG1
 	}
 
 	for (auto pageIndex = 0; pageIndex < 128; pageIndex++)
