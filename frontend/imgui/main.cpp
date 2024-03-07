@@ -2,8 +2,10 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 #include "ImGuiFileDialog.h"
+#include <log/log.h>
+#include <log/imgui_log.h>
 #include <cstdio>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
 #else
@@ -22,11 +24,12 @@ int main(int, char**)
 		return -1;
 	}
 
+    ImGuiLogger::InitializeImGuiLogger();
+
 	Bus *bus = new Bus();
 	Cpu *cpu = new Cpu(bus);
 
-
-	// Decide GL+GLSL versions
+    // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 	// GL ES 2.0 + GLSL 100
 	const char* glsl_version = "#version 100";
@@ -78,7 +81,7 @@ int main(int, char**)
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// Our state
-	bool cpu_reg_debug_window = false;
+	bool cpu_reg_debug_window = false, log_debug_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	// Main loop
@@ -116,8 +119,10 @@ int main(int, char**)
 			if (ImGui::BeginMenu("Debug"))
 			{
 				static bool menu_toggle_cpu_reg_window = false;
+                static bool menu_toggle_log_window = false;
 
 				ImGui::MenuItem("CPU Registers", "", &menu_toggle_cpu_reg_window, true);
+                ImGui::MenuItem("Log", "", &menu_toggle_log_window, true);
 
 				// Check the status of the menu item and act accordingly
 				if (menu_toggle_cpu_reg_window)
@@ -129,8 +134,20 @@ int main(int, char**)
 					cpu_reg_debug_window = false;
 				}
 
+                // Check the status of the menu item and act accordingly
+                if (menu_toggle_log_window)
+                {
+                    log_debug_window = true;
+                }
+                else
+                {
+                    log_debug_window = false;
+                }
+
 				ImGui::EndMenu();
 			}
+
+
 
 			ImGui::EndMainMenuBar();
 		}
@@ -153,13 +170,27 @@ int main(int, char**)
 			{
 				if (ImGui::Button("Run"))
 				{
-					// Handle button click
+                    // Show the logger screen here
 				}
 			}
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 			ImGui::End();
 		}
+
+        if (log_debug_window)
+        {
+            // Retrieve log messages directly from the Logger
+            const std::vector<std::string>& logMessages = ImGuiLogger::GetImGuiLogBuffer();
+
+            // Display log messages in the main window
+            ImGui::Begin("Log Messages");
+            for (const auto& message : logMessages)
+            {
+                ImGui::TextUnformatted(message.c_str());
+            }
+            ImGui::End();
+        }
 
 		if (cpu_reg_debug_window)
 		{

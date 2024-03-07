@@ -1,4 +1,5 @@
 #include <cpu/cpu_interpreter.h>
+#include <log/log.h>
 #include <pawstation.h>
 
 #if __has_include(<format>)
@@ -11,7 +12,7 @@ using fmt::format;
 
 void cpu_interpreter_setup(Cpu *cpu)
 {
-	std::cout << CYAN << "[CPU] Populating opcode table..." << RESET "\n";
+    Logger::Instance().Log("[CPU] Populating opcode table...");
 }
 
 void cpu_step_interpreter(Cpu *cpu)
