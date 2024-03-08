@@ -1,6 +1,4 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
-
 #include <cpu/cpu_interpreter.h>
 
 TEST_CASE("[CPU/INTERPRETER] LUI")

@@ -6,6 +6,7 @@
 #include <functional>
 
 #define rt ((opcode >> 16) & 0x1F)
+#define rs ((opcode >> 21) & 0x1F)
 #define imm (opcode & 0xFFFF)
 
 enum class EmulationMode

@@ -18,6 +18,7 @@ void cpu_interpreter_setup(Cpu *cpu)
     std::fill(std::begin(cpu->cop0_opcodes), std::end(cpu->cop0_opcodes), &Cpu::cpu_unknown_cop0_opcode);
 
     cpu->opcodes[0x0F] = &cpu_interpreter_lui;
+    cpu->opcodes[0x0D] = &cpu_interpreter_ori;
 }
 
 void cpu_step_interpreter(Cpu *cpu)
@@ -31,4 +32,9 @@ void cpu_step_interpreter(Cpu *cpu)
 void cpu_interpreter_lui(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rt] = imm << 16;
+}
+
+void cpu_interpreter_ori(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->registers[rt] = cpu->registers[rs] | imm;
 }
