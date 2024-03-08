@@ -12,9 +12,6 @@ void ImGuiPawstation::init()
 
     ImGuiLogger::InitializeImGuiLogger();
 
-    ImGuiExitSystem imguiExitSystem;
-    Pawstation::setExitSystem(&imguiExitSystem);
-
     bus = new Bus();
     cpu = new Cpu(bus);
 
@@ -69,6 +66,9 @@ void ImGuiPawstation::init()
 
 void ImGuiPawstation::run()
 {
+    ImGuiExitSystem imguiExitSystem;
+    Pawstation::setExitSystem(&imguiExitSystem);
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
