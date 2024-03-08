@@ -1,9 +1,9 @@
 #include <bus/bus.h>
 #include <bus/bus_fmem.h>
-#include <utils/application_manager.h>
 #include <sstream>
 #include <log/log.h>
 #include <cstring>
+#include <pawstation.h>
 
 #if __has_include(<format>)
 #include <format>
@@ -64,6 +64,6 @@ std::uint32_t Bus::fmem_read32(std::uint32_t address) {
         std::ostringstream logMessage;
         logMessage << "[BUS] 32-bit read from unknown address: 0x" << format("{:08X}", address);
         Logger::Instance().Error(logMessage.str());
-        ApplicationManager::exit_();
+        Pawstation::exit_();
 	}
 }

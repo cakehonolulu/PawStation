@@ -17,3 +17,18 @@
 #define BOLDMAGENTA "\033[1m\033[35m" /* Bold Magenta */
 #define BOLDCYAN "\033[1m\033[36m"    /* Bold Cyan */
 #define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
+
+#include <utils/exit_system.h>
+
+class Pawstation {
+public:
+    static void setExitSystem(ExitSystem* exitSystem);
+    static bool requestedExit();
+    static void exit_();
+    static bool requested_exit;
+    virtual void init() = 0;
+    virtual void run() = 0;
+
+private:
+    static ExitSystem* exitSystem;
+};

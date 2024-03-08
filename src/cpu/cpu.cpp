@@ -2,7 +2,6 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
-#include <utils/application_manager.h>
 #include <log/log.h>
 #include <pawstation.h>
 
@@ -70,7 +69,7 @@ void Cpu::cpu_unknown_opcode(std::uint32_t opcode)
                << " (Function bits: 0x" << format("{:02X}", (opcode >> 26) & 0x3F) << ")";
 
     Logger::Instance().Error(logMessage.str());
-    ApplicationManager::exit_();
+    Pawstation::exit_();
 }
 
 void Cpu::cpu_unknown_extended_opcode(std::uint32_t opcode)
@@ -79,7 +78,7 @@ void Cpu::cpu_unknown_extended_opcode(std::uint32_t opcode)
     logMessage << "[CPU] Unimplemented extended opcode: 0x" << format("{:04X}", opcode) << " (Function bits: 0x"
 	          << format("{:02X}", (opcode >> 26) & 0x3F) << ")";
     Logger::Instance().Error(logMessage.str());
-    ApplicationManager::exit_();
+    Pawstation::exit_();
 }
 
 void Cpu::cpu_unknown_cop0_opcode(std::uint32_t opcode)
@@ -88,5 +87,5 @@ void Cpu::cpu_unknown_cop0_opcode(std::uint32_t opcode)
     logMessage << "[CPU] Unimplemented COP0 opcode: 0x" << format("{:04X}", opcode) << " (Function bits: 0x"
 	          << format("{:02X}", (opcode >> 26) & 0x3F) << ")";
     Logger::Instance().Error(logMessage.str());
-    ApplicationManager::exit_();
+    Pawstation::exit_();
 }
