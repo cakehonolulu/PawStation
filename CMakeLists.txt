@@ -26,14 +26,14 @@ add_subdirectory(src)
 add_subdirectory(utils)
 
 # Add frontend or testing based on options
-if (!RUN_TESTS)
+if (RUN_TESTS)
+    add_subdirectory(tests)
+else()
     if(NOT USE_IMGUI_FRONTEND AND NOT USE_HEADLESS_FRONTEND)
         message(FATAL_ERROR "No frontend selected, please enable ImGui or Headless frontend!")
     else()
         add_subdirectory(frontend)
     endif()
-else()
-    add_subdirectory(tests)
 endif()
 
 # Set include directories for the main executable
