@@ -5,6 +5,14 @@
 #include <functional>
 #include <pawstation.h>
 
+enum class LogLevel
+{
+    Info,
+    Warning,
+    Error,
+    Debug
+};
+
 class Logger
 {
 public:

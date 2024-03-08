@@ -1,6 +1,17 @@
 #include <bus/bus.h>
 #include <bus/bus_fmem.h>
+#include <utils/application_manager.h>
+#include <sstream>
+#include <log/log.h>
 #include <cstring>
+
+#if __has_include(<format>)
+#include <format>
+using std::format;
+#else
+#include <fmt/format.h>
+using fmt::format;
+#endif
 
 void Bus::fmem_init()
 {
@@ -40,8 +51,8 @@ void Bus::fmem_init()
 }
 
 std::uint32_t Bus::fmem_read32(std::uint32_t address) {
-	const auto page = address >> 12;           // Divide the address by 4KB to get the page number.
-	const auto offset = address & 0xFFF;       // The offset inside the 4KB page
+	const auto page = address >> 16;           // Divide the address by 4KB to get the page number.
+	const auto offset = address & 0xFFFF;       // The offset inside the 4KB page
 	const auto pointer = address_space_r[page];// Get the pointer to this page
 
 	if (pointer != 0)// Check if the pointer is not nullptr. If it is not, then this is a fast page
@@ -50,7 +61,9 @@ std::uint32_t Bus::fmem_read32(std::uint32_t address) {
 
 	else {
 		// Handle other cases or throw an exception if needed
-		printf("32-bit read from unknown address: 0x%08X", address);
-		exit(1);
+        std::ostringstream logMessage;
+        logMessage << "[BUS] 32-bit read from unknown address: 0x" << format("{:08X}", address);
+        Logger::Instance().Error(logMessage.str());
+        ApplicationManager::exit_();
 	}
 }

@@ -57,9 +57,9 @@ public:
 	        "Reserved"
 	};
 
-	std::function<void(Cpu *, std::uint32_t)> opcodes[0x3F] = {&Cpu::cpu_unknown_opcode};
-	std::function<void(Cpu *, std::uint32_t)> extended_opcodes[0x3F] = {&Cpu::cpu_unknown_extended_opcode};
-	std::function<void(Cpu *, std::uint32_t)> cop0_opcodes[0x11] = {&Cpu::cpu_unknown_cop0_opcode};
+	std::function<void(Cpu *, std::uint32_t)> opcodes[0x3F] = {nullptr};
+	std::function<void(Cpu *, std::uint32_t)> extended_opcodes[0x3F] = {nullptr};
+	std::function<void(Cpu *, std::uint32_t)> cop0_opcodes[0x11] = {nullptr};
 
 	std::uint32_t registers[32];
 	std::uint32_t cop0_registers[32];

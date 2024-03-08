@@ -13,6 +13,9 @@ using fmt::format;
 void cpu_interpreter_setup(Cpu *cpu)
 {
     Logger::Instance().Log("[CPU] Populating opcode table...");
+    std::fill(std::begin(cpu->opcodes), std::end(cpu->opcodes), &Cpu::cpu_unknown_opcode);
+    std::fill(std::begin(cpu->extended_opcodes), std::end(cpu->extended_opcodes), &Cpu::cpu_unknown_extended_opcode);
+    std::fill(std::begin(cpu->cop0_opcodes), std::end(cpu->cop0_opcodes), &Cpu::cpu_unknown_cop0_opcode);
 }
 
 void cpu_step_interpreter(Cpu *cpu)

@@ -30,7 +30,8 @@ if(USE_IMGUI_FRONTEND)
                     ${IMGUI_SOURCES}
                     ${IMGUI_FILE_DIALOG_SOURCES}
                     main.cpp
-		    utils/imgui_log.cpp)
+		            utils/imgui_log.cpp
+                    imgui_exit.cpp)
 
     # Add OpenGL, SDL2, and ImGui include files to compilation
     target_include_directories(pawstation PUBLIC

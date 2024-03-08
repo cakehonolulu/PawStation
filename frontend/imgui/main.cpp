@@ -14,6 +14,8 @@
 
 #include <bus/bus.h>
 #include <cpu/cpu.h>
+#include <utils/application_manager.h>
+#include <frontend/imgui/imgui_exit.h>
 
 int main(int, char**)
 {
@@ -25,6 +27,9 @@ int main(int, char**)
 	}
 
     ImGuiLogger::InitializeImGuiLogger();
+
+    ImGuiExitSystem imguiExitSystem;
+    ApplicationManager::setExitSystem(&imguiExitSystem);
 
 	Bus *bus = new Bus();
 	Cpu *cpu = new Cpu(bus);
@@ -152,6 +157,38 @@ int main(int, char**)
 			ImGui::EndMainMenuBar();
 		}
 
+        if (ApplicationManager::requestedExit()) {
+            // Handle ImGui-specific exit behavior
+            ImGui::OpenPopup("Exception occurred");
+            // Additional ImGui-specific cleanup if needed
+            // ...
+        }
+
+        // Render the exit popup if needed
+        if (ImGui::BeginPopupModal("Exception occurred", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("An error has occurred, check the log window!");
+
+            ImGui::Text("Do you want to exit the application?");
+
+            if (ImGui::Button("Yes")) {
+                // Deallocate ImGui, OpenGL, SDL, etc.
+                // ...
+
+                // Call std::exit
+                std::exit(0);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("No")) {
+                // Close the popup
+                ApplicationManager::requested_exit = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
 		{
 			bool isButtonEnabled = true;
@@ -168,9 +205,9 @@ int main(int, char**)
 			// Use the condition to enable or disable the button
 			if (bus->is_bios_loaded())
 			{
-				if (ImGui::Button("Run"))
+				if (ImGui::Button("Step"))
 				{
-                    // Show the logger screen here
+                    cpu->cpu_step();
 				}
 			}
 
@@ -178,21 +215,26 @@ int main(int, char**)
 			ImGui::End();
 		}
 
-        if (log_debug_window)
-        {
-            // Retrieve log messages directly from the Logger
-            const std::vector<std::string>& logMessages = ImGuiLogger::GetImGuiLogBuffer();
+        if (log_debug_window) {
+            const auto& logMessages = ImGuiLogger::GetImGuiLogBuffer();
 
-            // Display log messages in the main window
             ImGui::Begin("Log Messages");
-            for (const auto& message : logMessages)
-            {
-                ImGui::TextUnformatted(message.c_str());
+
+            for (const auto& logEntry : logMessages) {
+                const std::string& message = logEntry.first;
+                LogLevel level = logEntry.second;
+
+                if (level == LogLevel::Error) {
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", message.c_str());
+                } else {
+                    ImGui::TextUnformatted(message.c_str());
+                }
             }
+
             ImGui::End();
         }
 
-		if (cpu_reg_debug_window)
+        if (cpu_reg_debug_window)
 		{
 			ImGui::Begin("CPU Registers", &cpu_reg_debug_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 			                                                        // Display the general-purpose registers

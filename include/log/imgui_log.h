@@ -17,7 +17,7 @@ namespace ImGuiLogger
     void ImGuiSpecificCode();
 
     // Access the ImGui log buffer
-    const std::vector<std::string>& GetImGuiLogBuffer();
+    const std::vector<std::pair<std::string, LogLevel>>& GetImGuiLogBuffer();
 
     // Clear the ImGui log buffer
     void ClearImGuiLogBuffer();

@@ -3,16 +3,14 @@
 
 namespace ImGuiLogger
 {
-    static std::vector<std::string> ImGuiLogBuffer;
+    static std::vector<std::pair<std::string, LogLevel>> ImGuiLogBuffer;
 
-    void ImGuiLogFunction(const std::string& message)
-    {
-        ImGuiLogBuffer.push_back(message);
+    void ImGuiLogFunction(const std::string& message) {
+        ImGuiLogBuffer.push_back({message, LogLevel::Info});
     }
 
-    void ImGuiErrorFunction(const std::string& message)
-    {
-        ImGuiLogBuffer.push_back(message);
+    void ImGuiErrorFunction(const std::string& message) {
+        ImGuiLogBuffer.push_back({message, LogLevel::Error});
     }
 
     void InitializeImGuiLogger()
@@ -21,7 +19,7 @@ namespace ImGuiLogger
         Logger::Instance().SetErrorFunction(ImGuiErrorFunction);
     }
 
-    const std::vector<std::string>& GetImGuiLogBuffer()
+    const std::vector<std::pair<std::string, LogLevel>>& GetImGuiLogBuffer()
     {
         return ImGuiLogBuffer;
     }
