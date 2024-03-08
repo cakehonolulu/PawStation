@@ -65,5 +65,6 @@ std::uint32_t Bus::fmem_read32(std::uint32_t address) {
         logMessage << "[BUS] 32-bit read from unknown address: 0x" << format("{:08X}", address);
         Logger::Instance().Error(logMessage.str());
         Pawstation::exit_();
+        return 0;
 	}
 }
