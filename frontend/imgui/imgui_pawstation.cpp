@@ -319,37 +319,62 @@ void ImGuiPawstation::run()
     return;
 }
 
-void imgui_render_disassembler(Cpu* cpu, Bus* bus)
-{
+void imgui_render_disassembler(Cpu* cpu, Bus* bus) {
   Disassembler disassembler;
 
-  std::uint32_t currentPC = cpu->pc;
-
+  // ImGui window title
   ImGui::Text("Disassembler");
 
+  // Input box to jump to a specific PC value
   static char jumpToAddressBuffer[9] = "00000000"; // Assumes 32-bit addresses
-  ImGui::InputText("Jump to PC:", jumpToAddressBuffer, sizeof(jumpToAddressBuffer), ImGuiInputTextFlags_CharsHexadecimal);
+  ImGui::InputText("Jump to PC:", jumpToAddressBuffer,
+                   sizeof(jumpToAddressBuffer),
+                   ImGuiInputTextFlags_CharsHexadecimal);
 
-  std::uint32_t jumpToAddress = std::strtoul(jumpToAddressBuffer, nullptr, 16);
+  // Convert the input buffer to a uint32_t
+  std::uint32_t jumpToAddress =
+      std::strtoul(jumpToAddressBuffer, nullptr, 16);
 
+  // Button to jump to the specified PC value
   if (ImGui::Button("Jump")) {
     cpu->pc = jumpToAddress;
   }
 
+  // ImGui window for disassembled code
   ImGui::BeginChild("Disassembly", ImVec2(0, 0), true);
 
+  // Calculate the number of instructions to display based on the window size
   int numInstructions = ImGui::GetWindowHeight() / ImGui::GetTextLineHeight();
 
+  // Get the current PC value from the CPU
+  std::uint32_t currentPC = cpu->pc;
+
+  // Loop to disassemble and display instructions
   ImGuiListClipper clipper;
-  clipper.Begin(numInstructions);
+  clipper.Begin(numInstructions); // Pass the number of items
   while (clipper.Step()) {
     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
       // Disassemble the instruction at the current PC
       std::uint32_t opcode = bus->read32(currentPC);
       std::string disassembly = disassembler.Disassemble(opcode);
 
-      ImGui::Text("%08X: %s", currentPC, disassembly.c_str());
+      // Highlight the current instruction
+      bool isCurrentInstruction = (currentPC == cpu->pc);
+      if (isCurrentInstruction) {
+        ImGui::PushStyleColor(ImGuiCol_Text,
+                              ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // Yellow text color
+      }
 
+      // Display the disassembled instruction with the current PC value
+      ImGui::Text("%08X: %s%s", currentPC, disassembly.c_str(),
+                  (isCurrentInstruction) ? " <-" : "");
+
+      // Reset text color if it was changed for highlighting
+      if (isCurrentInstruction) {
+        ImGui::PopStyleColor();
+      }
+
+      // Update the current PC for the next instruction
       currentPC += 4;
     }
   }
