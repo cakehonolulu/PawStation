@@ -33,3 +33,5 @@ private:
     SDL_GLContext gl_context;
     std::string glsl_version;
 };
+
+void imgui_render_disassembler(Cpu* cpu, Bus* bus);

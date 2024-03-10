@@ -1,3 +1,5 @@
+#include <cpu/disassembler.h>
+#include <cpu/cpu_registers.h>
 #include <frontend/imgui/imgui_pawstation.h>
 
 void ImGuiPawstation::init()
@@ -73,7 +75,7 @@ void ImGuiPawstation::run()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-    bool cpu_reg_debug_window = false, log_debug_window = false;
+    bool cpu_reg_debug_window = false, log_debug_window = false, disassembly_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     bool done = false;
@@ -111,9 +113,11 @@ void ImGuiPawstation::run()
             {
                 static bool menu_toggle_cpu_reg_window = false;
                 static bool menu_toggle_log_window = false;
+                static bool menu_toggle_disassembler_window = false;
 
                 ImGui::MenuItem("CPU Registers", "", &menu_toggle_cpu_reg_window, true);
                 ImGui::MenuItem("Log", "", &menu_toggle_log_window, true);
+                ImGui::MenuItem("Disassembler", "", &menu_toggle_disassembler_window, true);
 
                 // Check the status of the menu item and act accordingly
                 if (menu_toggle_cpu_reg_window)
@@ -133,6 +137,15 @@ void ImGuiPawstation::run()
                 else
                 {
                     log_debug_window = false;
+                }
+
+                if (menu_toggle_disassembler_window)
+                {
+                  disassembly_window = true;
+                }
+                else
+                {
+                  disassembly_window = false;
                 }
 
                 ImGui::EndMenu();
@@ -220,6 +233,11 @@ void ImGuiPawstation::run()
             ImGui::End();
         }
 
+        if (disassembly_window)
+        {
+          imgui_render_disassembler(cpu, bus);
+        }
+
         if (cpu_reg_debug_window)
         {
             ImGui::Begin("CPU Registers", &cpu_reg_debug_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
@@ -233,7 +251,7 @@ void ImGuiPawstation::run()
 
             for (int i = 0; i < 32; ++i)
             {
-                ImGui::Text("%s:", cpu->cpu_register_names[i].c_str());
+                ImGui::Text("%s:", cpu_register_names[i].c_str());
                 ImGui::NextColumn();
                 ImGui::Text("0x%08X", cpu->registers[i]);
                 ImGui::NextColumn();
@@ -250,9 +268,9 @@ void ImGuiPawstation::run()
             for (int i = 0; i < 32; ++i)
             {
                 // Skip printing if the register name is "Reserved"
-                if (cpu->cop0_register_names[i] != "Reserved")
+                if (cop0_register_names[i] != "Reserved")
                 {
-                    ImGui::Text("%s:", cpu->cop0_register_names[i].c_str());
+                    ImGui::Text("%s:", cop0_register_names[i].c_str());
                     ImGui::NextColumn();
                     ImGui::Text("0x%08X", cpu->cop0_registers[i]);
                     ImGui::NextColumn();
@@ -299,4 +317,42 @@ void ImGuiPawstation::run()
     SDL_Quit();
 
     return;
+}
+
+void imgui_render_disassembler(Cpu* cpu, Bus* bus)
+{
+  Disassembler disassembler;
+
+  std::uint32_t currentPC = cpu->pc;
+
+  ImGui::Text("Disassembler");
+
+  static char jumpToAddressBuffer[9] = "00000000"; // Assumes 32-bit addresses
+  ImGui::InputText("Jump to PC:", jumpToAddressBuffer, sizeof(jumpToAddressBuffer), ImGuiInputTextFlags_CharsHexadecimal);
+
+  std::uint32_t jumpToAddress = std::strtoul(jumpToAddressBuffer, nullptr, 16);
+
+  if (ImGui::Button("Jump")) {
+    cpu->pc = jumpToAddress;
+  }
+
+  ImGui::BeginChild("Disassembly", ImVec2(0, 0), true);
+
+  int numInstructions = ImGui::GetWindowHeight() / ImGui::GetTextLineHeight();
+
+  ImGuiListClipper clipper;
+  clipper.Begin(numInstructions);
+  while (clipper.Step()) {
+    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
+      // Disassemble the instruction at the current PC
+      std::uint32_t opcode = bus->read32(currentPC);
+      std::string disassembly = disassembler.Disassemble(opcode);
+
+      ImGui::Text("%08X: %s", currentPC, disassembly.c_str());
+
+      currentPC += 4;
+    }
+  }
+
+  ImGui::EndChild();
 }
