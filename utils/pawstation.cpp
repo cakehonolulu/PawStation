@@ -17,4 +17,6 @@ std::uint32_t Pawstation::exit_() {
     if (exitSystem) {
         exitSystem->exitApplication();
     }
+
+    return 0;
 }
