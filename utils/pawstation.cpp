@@ -1,3 +1,5 @@
+
+#include <cstdint>
 #include <pawstation.h>
 
 ExitSystem* Pawstation::exitSystem = nullptr;
@@ -11,7 +13,7 @@ bool Pawstation::requestedExit() {
     return requested_exit;
 }
 
-void Pawstation::exit_() {
+std::uint32_t Pawstation::exit_() {
     if (exitSystem) {
         exitSystem->exitApplication();
     }

@@ -19,12 +19,13 @@
 #define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
 
 #include <utils/exit_system.h>
+#include <cstdint>
 
 class Pawstation {
 public:
     static void setExitSystem(ExitSystem* exitSystem);
     static bool requestedExit();
-    static void exit_();
+    static std::uint32_t exit_();
     static bool requested_exit;
     virtual void init() = 0;
     virtual void run() = 0;
