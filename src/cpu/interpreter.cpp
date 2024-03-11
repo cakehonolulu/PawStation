@@ -24,17 +24,19 @@ void interpreter_setup(Cpu *cpu)
 void step_interpreter(Cpu *cpu)
 {
 	std::uint32_t opcode = cpu->fetch_opcode();
-	cpu->pc = cpu->next_pc;
-	cpu->next_pc += 4;
-	cpu->parse_opcode(opcode);
+    cpu->parse_opcode(opcode);
 }
 
 void interpreter_lui(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rt] = imm << 16;
+    cpu->pc = cpu->next_pc;
+    cpu->next_pc += 4;
 }
 
 void interpreter_ori(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rt] = cpu->registers[rs] | imm;
+    cpu->pc = cpu->next_pc;
+    cpu->next_pc += 4;
 }
