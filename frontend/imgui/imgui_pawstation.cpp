@@ -275,20 +275,20 @@ void ImGuiPawstation::run()
             // Get the current PC value from the CPU
             std::uint32_t currentPC = cpu->pc;
 
-            // Use an additional variable to keep track of the starting address
-            static std::int32_t startOffset = 0;
+            // Define the range of addresses to disassemble relative to the current PC
+            int startRelative = -10;
+            int endRelative = 20;
 
-            // Calculate the starting address based on the scroll position
+            // Calculate the starting address based on the current PC and scroll position
+            int startOffset = (currentPC + startRelative * 4) & (~0xF); // Ensure alignment to 16 bytes
+
+            // ImGuiListClipper for scrolling through instructions
             ImGuiListClipper clipper;
             clipper.Begin(numInstructions); // Pass the number of items
             while (clipper.Step()) {
-                // Calculate the starting address based on the scroll position
-                int scrollOffset = ImGui::GetScrollY() / ImGui::GetTextLineHeight();
-                startOffset = scrollOffset;
-
                 for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
                     // Calculate the address for the current instruction
-                    std::int32_t address = currentPC + (i - startOffset) * 4;
+                    std::int32_t address = startOffset + i * 4;
 
                     // Disassemble the instruction at the current address
                     std::uint32_t opcode = bus->read32(address);
@@ -313,8 +313,6 @@ void ImGuiPawstation::run()
             }
 
             ImGui::EndChild();
-
-
             ImGui::End();
         }
 
