@@ -51,19 +51,27 @@ void Bus::fmem_init()
 }
 
 std::uint32_t Bus::fmem_read32(std::uint32_t address) {
-	const auto page = address >> 16;           // Divide the address by 4KB to get the page number.
-	const auto offset = address & 0xFFFF;       // The offset inside the 4KB page
-	const auto pointer = address_space_r[page];// Get the pointer to this page
+    const auto page = address >> 16;           // Divide the address by 4KB to get the page number.
+    const auto offset = address & 0xFFFF;       // The offset inside the 4KB page
+    const auto pointer = address_space_r[page];// Get the pointer to this page
 
-	if (pointer != 0)// Check if the pointer is not nullptr. If it is not, then this is a fast page
-		return *(uint32_t *) (pointer +
-		                      offset);// Actually read the value using the pointer from the page table + the offset.
+    if (pointer != 0)
+    {
+        return *(uint32_t *) (pointer +
+                              offset);// Actually read the value using the pointer from the page table + the offset.
+    }
+	else
+    {
+        // TODO: This is to avoid exceptions when reading from down the BIOS ROM region, but it's not the best way to handle this.
+        if (address < 0xBFC00000 && address > 0xBFB00000)
+        {
+            return 0xBADC0DE5;
+        }
 
-	else {
-          // Handle other cases or throw an exception if needed
-          std::ostringstream logMessage;
-          logMessage << "[BUS] 32-bit read from unknown address: 0x" << format("{:08X}", address);
-          Logger::Instance().Error(logMessage.str());
-          return Pawstation::exit_();;
-	}
+        // Handle other cases or throw an exception if needed
+        std::ostringstream logMessage;
+        logMessage << "[BUS] 32-bit read from unknown address: 0x" << format("{:08X}", address);
+        Logger::Instance().Error(logMessage.str());
+        return Pawstation::exit_();;
+        }
 }
