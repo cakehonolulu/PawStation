@@ -4,4 +4,7 @@
 void ImGuiExitSystem::exitApplication() {
     // Set ApplicationManger::requested_exit to true
     Pawstation::requested_exit = true;
+
+    // Set ApplicationManger::abort to true
+    Pawstation::abort = true;
 }

@@ -4,6 +4,7 @@
 
 ExitSystem* Pawstation::exitSystem = nullptr;
 bool Pawstation::requested_exit = false;
+bool Pawstation::abort = false;
 
 void Pawstation::setExitSystem(ExitSystem* exitSystem) {
     Pawstation::exitSystem = exitSystem;
@@ -11,6 +12,10 @@ void Pawstation::setExitSystem(ExitSystem* exitSystem) {
 
 bool Pawstation::requestedExit() {
     return requested_exit;
+}
+
+bool Pawstation::aborted() {
+    return abort;
 }
 
 std::uint32_t Pawstation::exit_() {

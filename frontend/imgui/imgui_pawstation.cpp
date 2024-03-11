@@ -226,92 +226,7 @@ void ImGuiPawstation::run()
 
         if (disassembly_window)
         {
-            ImGui::Begin("Disassembler");
-
-            Disassembler disassembler;
-
-            ImGui::Text("PC");
-
-            ImGui::SameLine();
-
-            // Input box to jump to a specific PC value
-            static char jumpToAddressBuffer[9] = "00000000"; // Assumes 32-bit addresses
-            ImGui::InputText(":", jumpToAddressBuffer,
-                             sizeof(jumpToAddressBuffer),
-                             ImGuiInputTextFlags_CharsHexadecimal);
-
-            ImGui::SameLine();
-
-            // Convert the input buffer to a uint32_t
-            std::uint32_t jumpToAddress = std::strtoul(jumpToAddressBuffer, nullptr, 16);
-
-            // Button to jump to the specified PC value
-            if (ImGui::Button("Jump")) {
-                cpu->pc = jumpToAddress;
-            }
-
-            // Use the condition to enable or disable the button
-            if (bus->is_bios_loaded())
-            {
-                if (ImGui::ArrowButton("##PlayButton", ImGuiDir_Right))
-                {
-                    cpu->run();
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("Step"))
-                {
-                    cpu->step();
-                }
-            }
-
-            // ImGui window for disassembled code
-            ImGui::BeginChild("Disassembly", ImVec2(0, 0), true);
-
-            // Calculate the number of instructions to display based on the window size
-            int numInstructions = ImGui::GetWindowHeight() / ImGui::GetTextLineHeight();
-
-            // Get the current PC value from the CPU
-            std::uint32_t currentPC = cpu->pc;
-
-            // Define the range of addresses to disassemble relative to the current PC
-            int startRelative = -10;
-            int endRelative = 20;
-
-            // Calculate the starting address based on the current PC and scroll position
-            int startOffset = (currentPC + startRelative * 4) & (~0xF); // Ensure alignment to 16 bytes
-
-            // ImGuiListClipper for scrolling through instructions
-            ImGuiListClipper clipper;
-            clipper.Begin(numInstructions); // Pass the number of items
-            while (clipper.Step()) {
-                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-                    // Calculate the address for the current instruction
-                    std::int32_t address = startOffset + i * 4;
-
-                    // Disassemble the instruction at the current address
-                    std::uint32_t opcode = bus->read32(address);
-                    std::string disassembly = disassembler.Disassemble(opcode);
-
-                    // Highlight the current instruction
-                    bool isCurrentInstruction = (address == cpu->pc);
-                    bool error = Pawstation::requested_exit;
-
-                    // Set text color based on opcode success/failure
-                    // Display the disassembled instruction with appropriate color
-                    if (error && isCurrentInstruction) {
-                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%08X: %s <- ERROR", address, disassembly.c_str());
-                    } else if (isCurrentInstruction) {
-                        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "%08X: %s <-", address, disassembly.c_str());
-                    } else {
-                        ImGui::Text("%08X: %s", address, disassembly.c_str());
-                    }
-                }
-            }
-
-            ImGui::EndChild();
-            ImGui::End();
+            imgui_disassembly_window(cpu, bus);
         }
 
         if (cpu_reg_debug_window)
@@ -393,4 +308,142 @@ void ImGuiPawstation::run()
     SDL_Quit();
 
     return;
+}
+
+void imgui_disassembly_window(Cpu *cpu, Bus *bus)
+{
+    ImGui::Begin("Disassembler");
+
+    Disassembler disassembler;
+
+    ImGui::Text("PC");
+
+    ImGui::SameLine();
+
+    // Input box to jump to a specific PC value
+    static char jumpToAddressBuffer[9] = "00000000"; // Assumes 32-bit addresses
+    ImGui::InputText(":", jumpToAddressBuffer,
+                     sizeof(jumpToAddressBuffer),
+                     ImGuiInputTextFlags_CharsHexadecimal);
+
+    // Convert the input buffer to a uint32_t
+    std::uint32_t jumpToAddress = std::strtoul(jumpToAddressBuffer, nullptr, 16);
+
+    // Conditionally style the "Run" button based on the error state
+    if (Pawstation::aborted()) {
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f); // Reduce alpha for disabled appearance
+        ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f); // Ensure full alpha for text in disabled button
+        ImGui::ArrowButton("##PlayButton", ImGuiDir_Right);
+        ImGui::PopStyleVar(2);
+    } else {
+        if (ImGui::ArrowButton("##PlayButton", ImGuiDir_Right)) {
+            cpu->run();
+        }
+    }
+
+    ImGui::SameLine();
+
+    // Conditionally style the "Step" button based on the error state
+    if (Pawstation::aborted()) {
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f); // Reduce alpha for disabled appearance
+        ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f); // Ensure full alpha for text in disabled button
+        ImGui::Button("Step");
+        ImGui::PopStyleVar(2);
+    } else {
+        if (ImGui::Button("Step")) {
+            cpu->step();
+        }
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Reset")) {
+        cpu->reset();
+        bus->reset();
+        Pawstation::abort = false;
+    }
+
+    // ImGui window for disassembled code
+    ImGui::BeginChild("Disassembly", ImVec2(0, 0), true);
+
+    // Calculate the number of instructions to display based on the window size
+    int numInstructions = ImGui::GetWindowHeight() / ImGui::GetTextLineHeight();
+
+    // Get the current PC value from the CPU
+    std::uint32_t currentPC = cpu->pc;
+
+    // Define the range of addresses to disassemble relative to the current PC
+    int startRelative = -10;
+    int endRelative = 20;
+
+    // Calculate the starting address based on the current PC and scroll position
+    int startOffset = (currentPC + startRelative * 4) & (~0xF); // Ensure alignment to 16 bytes
+
+    // ImGuiListClipper for scrolling through instructions
+    ImGuiListClipper clipper;
+    clipper.Begin(numInstructions); // Pass the number of items
+    while (clipper.Step()) {
+        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
+            // Calculate the address for the current instruction
+            std::int32_t address = startOffset + i * 4;
+
+            // Disassemble the instruction at the current address
+            std::uint32_t opcode = bus->read32(address);
+            std::string disassembly = disassembler.Disassemble(opcode);
+
+            // Highlight the current instruction
+            bool isCurrentInstruction = (address == cpu->pc);
+
+            std::uint8_t opcodeBytes[4];
+            for (int j = 0; j < 4; ++j) {
+                opcodeBytes[j] = (opcode >> (8 * j)) & 0xFF;
+            }
+
+            if (disassembly.find("UNKNOWN_OPCODE") == 0) {
+                disassembly = "UNKNOWN_OPCODE";
+            }
+
+            // Set text color based on opcode success/failure
+            // Display the disassembled instruction with appropriate color
+            if (Pawstation::aborted() && isCurrentInstruction) {
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%08X:", address);
+
+                for (int j = 0; j < 4; ++j) {
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%02X",
+                                       (opcode >> (8 * (3 - j))) & 0xFF);
+                }
+
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s <- ERROR", disassembly.c_str());
+            } else if (isCurrentInstruction) {
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "%08X:", address);
+
+                // Display each byte of the opcode in a different color
+                for (int j = 0; j < 4; ++j) {
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%02X",
+                                       (opcode >> (8 * (3 - j))) & 0xFF);
+                }
+
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "%s <-", disassembly.c_str());
+            } else {
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%08X:", address);
+
+                // Display each byte of the opcode in a different color
+                for (int j = 0; j < 4; ++j) {
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%02X",
+                                       (opcode >> (8 * (3 - j))) & 0xFF);
+                }
+
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", disassembly.c_str());
+            }
+        }
+    }
+
+    ImGui::EndChild();
+    ImGui::End();
 }

@@ -34,3 +34,4 @@ private:
     std::string glsl_version;
 };
 
+void imgui_disassembly_window(Cpu *cpu, Bus *bus);

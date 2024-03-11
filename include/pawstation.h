@@ -25,8 +25,10 @@ class Pawstation {
 public:
     static void setExitSystem(ExitSystem* exitSystem);
     static bool requestedExit();
+    static bool aborted();
     static std::uint32_t exit_();
     static bool requested_exit;
+    static bool abort;
     virtual void init() = 0;
     virtual void run() = 0;
 
