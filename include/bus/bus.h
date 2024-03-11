@@ -27,6 +27,7 @@ public:
 
 	std::function<std::uint32_t(std::uint32_t)> read32;
 	void load_bios(const std::string &bios_path);
+    void reset();
 	void fmem_init();
 	std::uint32_t fmem_read32(uint32_t address);
 

@@ -38,6 +38,11 @@ Bus::Bus(BusMode mode)
 	}
 }
 
+void Bus::reset()
+{
+    std::fill(ram.begin(), ram.end(), 0);
+}
+
 void Bus::load_bios(const std::string &bios_path)
 {
 	std::ifstream bios_file(bios_path, std::ios::binary);
