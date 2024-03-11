@@ -28,6 +28,7 @@ public:
 
 	std::function<void()> step;
 	void run();
+    void reset();
 
 	std::uint32_t fetch_opcode();
 	void parse_opcode(std::uint32_t opcode);

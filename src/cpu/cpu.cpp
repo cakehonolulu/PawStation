@@ -44,6 +44,14 @@ Cpu::~Cpu()
 {
 }
 
+void Cpu::reset()
+{
+    std::memset(registers, 0, sizeof(registers));
+    std::memset(cop0_registers, 0, sizeof(cop0_registers));
+    pc = 0xBFC00000;
+    next_pc = pc + 4;
+}
+
 void Cpu::run()
 {
 	while (!Pawstation::requestedExit())
