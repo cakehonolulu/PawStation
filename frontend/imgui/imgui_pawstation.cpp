@@ -296,18 +296,16 @@ void ImGuiPawstation::run()
 
                     // Highlight the current instruction
                     bool isCurrentInstruction = (address == cpu->pc);
-                    if (isCurrentInstruction) {
-                        ImGui::PushStyleColor(
-                                ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // Yellow text color
-                    }
+                    bool error = Pawstation::requested_exit;
 
-                    // Display the disassembled instruction with the current address
-                    ImGui::Text("%08X: %s%s", address, disassembly.c_str(),
-                                (isCurrentInstruction) ? " <-" : "");
-
-                    // Reset text color if it was changed for highlighting
-                    if (isCurrentInstruction) {
-                        ImGui::PopStyleColor();
+                    // Set text color based on opcode success/failure
+                    // Display the disassembled instruction with appropriate color
+                    if (error && isCurrentInstruction) {
+                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%08X: %s <- ERROR", address, disassembly.c_str());
+                    } else if (isCurrentInstruction) {
+                        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "%08X: %s <-", address, disassembly.c_str());
+                    } else {
+                        ImGui::Text("%08X: %s", address, disassembly.c_str());
                     }
                 }
             }
