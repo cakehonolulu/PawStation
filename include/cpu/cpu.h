@@ -2,8 +2,8 @@
 
 #include <bus/bus.h>
 #include <cstdint>
-#include <cpu/cpu_interpreter.h>
-#include <cpu/cpu_registers.h>
+#include <cpu/interpreter.h>
+#include <cpu/registers.h>
 #include <functional>
 
 #define rt ((opcode >> 16) & 0x1F)
@@ -26,14 +26,14 @@ public:
 
 	Bus *bus;
 
-	std::function<void()> cpu_step;
+	std::function<void()> step;
 	void run();
 
-	std::uint32_t cpu_fetch_opcode();
-	void cpu_parse_opcode(std::uint32_t opcode);
-	void cpu_unknown_opcode(std::uint32_t opcode);
-	void cpu_unknown_extended_opcode(std::uint32_t opcode);
-	void cpu_unknown_cop0_opcode(std::uint32_t opcode);
+	std::uint32_t fetch_opcode();
+	void parse_opcode(std::uint32_t opcode);
+	void unknown_opcode(std::uint32_t opcode);
+	void unknown_extended_opcode(std::uint32_t opcode);
+	void unknown_cop0_opcode(std::uint32_t opcode);
 
 	std::function<void(Cpu *, std::uint32_t)> opcodes[0x3F] = {nullptr};
 	std::function<void(Cpu *, std::uint32_t)> extended_opcodes[0x3F] = {nullptr};

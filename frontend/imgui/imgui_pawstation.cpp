@@ -1,5 +1,5 @@
 #include <cpu/disassembler.h>
-#include <cpu/cpu_registers.h>
+#include <cpu/registers.h>
 #include <frontend/imgui/imgui_pawstation.h>
 
 void ImGuiPawstation::init()
@@ -226,7 +226,96 @@ void ImGuiPawstation::run()
 
         if (disassembly_window)
         {
-          imgui_render_disassembler(cpu, bus);
+            ImGui::Begin("Disassembler");
+
+            Disassembler disassembler;
+
+            ImGui::Text("PC");
+
+            ImGui::SameLine();
+
+            // Input box to jump to a specific PC value
+            static char jumpToAddressBuffer[9] = "00000000"; // Assumes 32-bit addresses
+            ImGui::InputText(":", jumpToAddressBuffer,
+                             sizeof(jumpToAddressBuffer),
+                             ImGuiInputTextFlags_CharsHexadecimal);
+
+            ImGui::SameLine();
+
+            // Convert the input buffer to a uint32_t
+            std::uint32_t jumpToAddress = std::strtoul(jumpToAddressBuffer, nullptr, 16);
+
+            // Button to jump to the specified PC value
+            if (ImGui::Button("Jump")) {
+                cpu->pc = jumpToAddress;
+            }
+
+            // Use the condition to enable or disable the button
+            if (bus->is_bios_loaded())
+            {
+                if (ImGui::ArrowButton("##PlayButton", ImGuiDir_Right))
+                {
+                    cpu->run();
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Step"))
+                {
+                    cpu->step();
+                }
+            }
+
+            // ImGui window for disassembled code
+            ImGui::BeginChild("Disassembly", ImVec2(0, 0), true);
+
+            // Calculate the number of instructions to display based on the window size
+            int numInstructions = ImGui::GetWindowHeight() / ImGui::GetTextLineHeight();
+
+            // Get the current PC value from the CPU
+            std::uint32_t currentPC = cpu->pc;
+
+            // Use an additional variable to keep track of the starting address
+            static std::int32_t startOffset = 0;
+
+            // Calculate the starting address based on the scroll position
+            ImGuiListClipper clipper;
+            clipper.Begin(numInstructions); // Pass the number of items
+            while (clipper.Step()) {
+                // Calculate the starting address based on the scroll position
+                int scrollOffset = ImGui::GetScrollY() / ImGui::GetTextLineHeight();
+                startOffset = scrollOffset;
+
+                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
+                    // Calculate the address for the current instruction
+                    std::int32_t address = currentPC + (i - startOffset) * 4;
+
+                    // Disassemble the instruction at the current address
+                    std::uint32_t opcode = bus->read32(address);
+                    std::string disassembly = disassembler.Disassemble(opcode);
+
+                    // Highlight the current instruction
+                    bool isCurrentInstruction = (address == cpu->pc);
+                    if (isCurrentInstruction) {
+                        ImGui::PushStyleColor(
+                                ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // Yellow text color
+                    }
+
+                    // Display the disassembled instruction with the current address
+                    ImGui::Text("%08X: %s%s", address, disassembly.c_str(),
+                                (isCurrentInstruction) ? " <-" : "");
+
+                    // Reset text color if it was changed for highlighting
+                    if (isCurrentInstruction) {
+                        ImGui::PopStyleColor();
+                    }
+                }
+            }
+
+            ImGui::EndChild();
+
+
+            ImGui::End();
         }
 
         if (cpu_reg_debug_window)
@@ -308,97 +397,4 @@ void ImGuiPawstation::run()
     SDL_Quit();
 
     return;
-}
-
-void imgui_render_disassembler(Cpu* cpu, Bus* bus) {
-  ImGui::Begin("Disassembler");
-
-  Disassembler disassembler;
-
-  ImGui::Text("PC");
-
-  ImGui::SameLine();
-
-  // Input box to jump to a specific PC value
-  static char jumpToAddressBuffer[9] = "00000000"; // Assumes 32-bit addresses
-  ImGui::InputText(":", jumpToAddressBuffer,
-                   sizeof(jumpToAddressBuffer),
-                   ImGuiInputTextFlags_CharsHexadecimal);
-
-  ImGui::SameLine();
-
-  // Convert the input buffer to a uint32_t
-  std::uint32_t jumpToAddress = std::strtoul(jumpToAddressBuffer, nullptr, 16);
-
-  // Button to jump to the specified PC value
-  if (ImGui::Button("Jump")) {
-    cpu->pc = jumpToAddress;
-  }
-
-  // Use the condition to enable or disable the button
-  if (bus->is_bios_loaded())
-  {
-    if (ImGui::ArrowButton("##PlayButton", ImGuiDir_Right))
-    {
-      // TODO: Run
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Step"))
-    {
-      cpu->cpu_step();
-    }
-  }
-
-  // ImGui window for disassembled code
-  ImGui::BeginChild("Disassembly", ImVec2(0, 0), true);
-
-  // Calculate the number of instructions to display based on the window size
-  int numInstructions = ImGui::GetWindowHeight() / ImGui::GetTextLineHeight();
-
-  // Get the current PC value from the CPU
-  std::uint32_t currentPC = cpu->pc;
-
-  // Use an additional variable to keep track of the starting address
-  static std::int32_t startOffset = 0;
-
-  // Calculate the starting address based on the scroll position
-  ImGuiListClipper clipper;
-  clipper.Begin(numInstructions); // Pass the number of items
-  while (clipper.Step()) {
-    // Calculate the starting address based on the scroll position
-    int scrollOffset = ImGui::GetScrollY() / ImGui::GetTextLineHeight();
-    startOffset = scrollOffset;
-
-    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-      // Calculate the address for the current instruction
-      std::int32_t address = currentPC + (i - startOffset) * 4;
-
-      // Disassemble the instruction at the current address
-      std::uint32_t opcode = bus->read32(address);
-      std::string disassembly = disassembler.Disassemble(opcode);
-
-      // Highlight the current instruction
-      bool isCurrentInstruction = (address == cpu->pc);
-      if (isCurrentInstruction) {
-        ImGui::PushStyleColor(
-            ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)); // Yellow text color
-      }
-
-      // Display the disassembled instruction with the current address
-      ImGui::Text("%08X: %s%s", address, disassembly.c_str(),
-                  (isCurrentInstruction) ? " <-" : "");
-
-      // Reset text color if it was changed for highlighting
-      if (isCurrentInstruction) {
-        ImGui::PopStyleColor();
-      }
-    }
-  }
-
-  ImGui::EndChild();
-
-
-  ImGui::End();
 }

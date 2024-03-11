@@ -1,5 +1,5 @@
 #include <cpu/disassembler.h>
-#include <cpu/cpu_registers.h>
+#include <cpu/registers.h>
 
 #if __has_include(<format>)
 #include <format>

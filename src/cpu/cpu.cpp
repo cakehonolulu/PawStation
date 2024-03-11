@@ -21,8 +21,8 @@ Cpu::Cpu(Bus *bus_, EmulationMode mode)
 	{
 		case EmulationMode::Interpreter:
             Logger::Instance().Log("[CPU] Running in Interpreter mode...");
-			cpu_interpreter_setup(this);
-			cpu_step = std::bind(&cpu_step_interpreter, this);
+			interpreter_setup(this);
+			step = std::bind(&step_interpreter, this);
 			break;
 		case EmulationMode::CachedInterpreter:
             Logger::Instance().Error("[CPU] Cached interpreter mode is unavailable...");
@@ -46,24 +46,24 @@ Cpu::~Cpu()
 
 void Cpu::run()
 {
-	while (true)
+	while (!Pawstation::requestedExit())
 	{
-		cpu_step();
+		step();
 	}
 }
 
-std::uint32_t Cpu::cpu_fetch_opcode()
+std::uint32_t Cpu::fetch_opcode()
 {
 	return bus->read32(pc);
 }
 
-void Cpu::cpu_parse_opcode(std::uint32_t opcode)
+void Cpu::parse_opcode(std::uint32_t opcode)
 {
 	std::uint8_t function = (opcode >> 26) & 0x3F;
 	opcodes[function](this, opcode);
 }
 
-void Cpu::cpu_unknown_opcode(std::uint32_t opcode)
+void Cpu::unknown_opcode(std::uint32_t opcode)
 {
     std::ostringstream logMessage;
     logMessage << "[CPU] Unimplemented opcode: 0x" << format("{:04X}", opcode)
@@ -73,7 +73,7 @@ void Cpu::cpu_unknown_opcode(std::uint32_t opcode)
     Pawstation::exit_();
 }
 
-void Cpu::cpu_unknown_extended_opcode(std::uint32_t opcode)
+void Cpu::unknown_extended_opcode(std::uint32_t opcode)
 {
     std::ostringstream logMessage;
     logMessage << "[CPU] Unimplemented extended opcode: 0x" << format("{:04X}", opcode) << " (Function bits: 0x"
@@ -82,7 +82,7 @@ void Cpu::cpu_unknown_extended_opcode(std::uint32_t opcode)
     Pawstation::exit_();
 }
 
-void Cpu::cpu_unknown_cop0_opcode(std::uint32_t opcode)
+void Cpu::unknown_cop0_opcode(std::uint32_t opcode)
 {
     std::ostringstream logMessage;
     logMessage << "[CPU] Unimplemented COP0 opcode: 0x" << format("{:04X}", opcode) << " (Function bits: 0x"

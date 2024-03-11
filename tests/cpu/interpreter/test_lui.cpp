@@ -1,5 +1,5 @@
 #include <doctest/doctest.h>
-#include <cpu/cpu_interpreter.h>
+#include <cpu/interpreter.h>
 
 TEST_CASE("[CPU/INTERPRETER] LUI")
 {
