@@ -75,3 +75,22 @@ std::uint32_t Bus::fmem_read32(std::uint32_t address) {
         return Pawstation::exit_();;
         }
 }
+
+void Bus::fmem_write32(std::uint32_t address, std::uint32_t value) {
+    const auto page = address >> 16;           // Divide the address by 4KB to get the page number.
+    const auto offset = address & 0xFFFF;       // The offset inside the 4KB page
+    const auto pointer = address_space_w[page];// Get the pointer to this page
+
+    if (pointer != 0)
+    {
+        *(uint32_t *) (pointer + offset) = value;// Actually write the value using the pointer from the page table + the offset.
+    }
+    else
+    {
+        // Handle other cases or throw an exception if needed
+        std::ostringstream logMessage;
+        logMessage << "[BUS] 32-bit write to unknown address: 0x" << format("{:08X}", address);
+        Logger::Instance().Error(logMessage.str());
+        Pawstation::exit_();
+    }
+}
