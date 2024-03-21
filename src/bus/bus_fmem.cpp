@@ -93,7 +93,7 @@ void Bus::fmem_write32(std::uint32_t address, std::uint32_t value) {
             {
                 // 0x1F801010 - BIOS ROM Delay/Size
                 case 0x10:
-                    Logger::Instance().Warn("[BUS] Write to BIOS ROM Delay/Size MEMORY_CONTROL register (Value: 0x" + format("{:08X}", value) + ")");
+                    Logger::Instance().Warn("[BUS] Write to BIOS ROM Delay/Size register (Value: 0x" + format("{:08X}", value) + ")");
                     break;
 
                 default:
@@ -103,6 +103,10 @@ void Bus::fmem_write32(std::uint32_t address, std::uint32_t value) {
                     Pawstation::exit_();
                     break;
             }
+        }
+        else MEMORY_RANGE(0x1F801060, 0x1F801064)
+        {
+            Logger::Instance().Warn("[BUS] Write to RAM_SIZE register (Value: 0x" + format("{:08X}", value) + ")");
         }
         else
         {
