@@ -23,6 +23,17 @@ Disassembler::Disassembler(std::uint32_t pc) : pc_(pc) {
         }
     });
 
+    SetDisassembleFunction(0x10, [](const Disassembler& disasm) {
+        {
+            switch (disasm.rs) {
+                case 0x04:
+                    return format("mtc0 ${}, ${}", cpu_register_names[disasm.rt], cop0_register_names[disasm.rd]);
+                default:
+                    return format("UNKNOWN_COP0_FUNCTION 0x{:02X}", disasm.rs);
+            }
+        }
+    });
+
     SetDisassembleFunction(0x02, [](const Disassembler& disasm) {
         return format("j 0x{:08X}",  (disasm.pc_ & 0xF0000000) | (disasm.jimm << 2));
     });

@@ -94,7 +94,7 @@ void Cpu::unknown_cop0_opcode(std::uint32_t opcode)
 {
     std::ostringstream logMessage;
     logMessage << "[CPU] Unimplemented COP0 opcode: 0x" << format("{:04X}", opcode) << " (Function bits: 0x"
-	          << format("{:02X}", subfunc) << ")";
+	          << format("{:02X}", rs) << ")";
     Logger::Instance().Error(logMessage.str());
     Pawstation::exit_();
 }

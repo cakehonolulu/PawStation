@@ -18,14 +18,18 @@ void interpreter_setup(Cpu *cpu)
     std::fill(std::begin(cpu->cop0_opcodes), std::end(cpu->cop0_opcodes), &Cpu::unknown_cop0_opcode);
 
     cpu->opcodes[0x00] = &interpreter_extended;
+    cpu->opcodes[0x10] = &interpreter_cop0;
+
+    cpu->cop0_opcodes[0x04] = &interpreter_mtc0;
+
+    cpu->extended_opcodes[0x00] = &interpreter_sll;
+    cpu->extended_opcodes[0x25] = &interpreter_or;
+
     cpu->opcodes[0x02] = &interpreter_j;
     cpu->opcodes[0x09] = &interpreter_addiu;
     cpu->opcodes[0x0D] = &interpreter_ori;
     cpu->opcodes[0x0F] = &interpreter_lui;
     cpu->opcodes[0x2B] = &interpreter_sw;
-
-    cpu->extended_opcodes[0x00] = &interpreter_sll;
-    cpu->extended_opcodes[0x25] = &interpreter_or;
 }
 
 void step_interpreter(Cpu *cpu)
@@ -43,6 +47,18 @@ void interpreter_extended(Cpu *cpu, std::uint32_t opcode)
     cpu->extended_opcodes[subfunc](cpu, opcode);
 }
 
+void interpreter_cop0(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->cop0_opcodes[rs](cpu, opcode);
+}
+
+// COP0 Opcodes
+void interpreter_mtc0(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->cop0_registers[rd] = cpu->registers[rt];
+}
+
+// Extended Opcodes
 void interpreter_sll(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rd] = cpu->registers[rt] << shift;
@@ -53,6 +69,7 @@ void interpreter_or(Cpu *cpu, std::uint32_t opcode)
     cpu->registers[rd] = cpu->registers[rs] | cpu->registers[rt];
 }
 
+// Regular Opcodes
 void interpreter_j(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->pc = (cpu->pc & 0xF0000000) | (jimm << 2);
