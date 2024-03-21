@@ -26,6 +26,7 @@ void interpreter_setup(Cpu *cpu)
     cpu->extended_opcodes[0x25] = &interpreter_or;
 
     cpu->opcodes[0x02] = &interpreter_j;
+    cpu->opcodes[0x05] = &interpreter_bne;
     cpu->opcodes[0x09] = &interpreter_addiu;
     cpu->opcodes[0x0D] = &interpreter_ori;
     cpu->opcodes[0x0F] = &interpreter_lui;
@@ -73,6 +74,14 @@ void interpreter_or(Cpu *cpu, std::uint32_t opcode)
 void interpreter_j(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->pc = (cpu->pc & 0xF0000000) | (jimm << 2);
+}
+
+void interpreter_bne(Cpu *cpu, std::uint32_t opcode)
+{
+    if (cpu->registers[rs] != cpu->registers[rt])
+    {
+        cpu->pc += simm << 2;
+    }
 }
 
 void interpreter_addiu(Cpu *cpu, std::uint32_t opcode)

@@ -38,6 +38,10 @@ Disassembler::Disassembler(std::uint32_t pc) : pc_(pc) {
         return format("j 0x{:08X}",  (disasm.pc_ & 0xF0000000) | (disasm.jimm << 2));
     });
 
+    SetDisassembleFunction(0x05, [](const Disassembler& disasm) {
+        return format("bne ${}, ${}, 0x{:08X}", cpu_register_names[disasm.rs], cpu_register_names[disasm.rt], disasm.simm);
+    });
+
     SetDisassembleFunction(0x09, [](const Disassembler& disasm) {
         return format("addiu ${}, ${}, 0x{:04X}", cpu_register_names[disasm.rt], cpu_register_names[disasm.rs], disasm.imm);
     });
