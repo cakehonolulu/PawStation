@@ -21,21 +21,25 @@ Disassembler::Disassembler() {
         }
     });
 
-  SetDisassembleFunction(0x0F, [](const Disassembler& disasm) {
-    return format("lui ${}, 0x{:04X}", cpu_register_names[disasm.rt], disasm.imm);
-  });
+    SetDisassembleFunction(0x09, [](const Disassembler& disasm) {
+        return format("addiu ${}, ${}, 0x{:04X}", cpu_register_names[disasm.rt], cpu_register_names[disasm.rs], disasm.imm);
+    });
 
-  SetDisassembleFunction(0x0D, [](const Disassembler& disasm) {
-    return format("ori ${}, ${}, 0x{:04X}", cpu_register_names[disasm.rt], cpu_register_names[disasm.rs], disasm.imm);
-  });
+    SetDisassembleFunction(0x0D, [](const Disassembler& disasm) {
+        return format("ori ${}, ${}, 0x{:04X}", cpu_register_names[disasm.rt], cpu_register_names[disasm.rs], disasm.imm);
+    });
 
-  SetDisassembleFunction(0x20, [](const Disassembler& disasm) {
-    return format("add ${}, ${}, ${}", cpu_register_names[disasm.rd], cpu_register_names[disasm.rs], disasm.rt);
-  });
+    SetDisassembleFunction(0x0F, [](const Disassembler& disasm) {
+        return format("lui ${}, 0x{:04X}", cpu_register_names[disasm.rt], disasm.imm);
+    });
 
-  SetDisassembleFunction(0x2B, [](const Disassembler& disasm) {
-    return format("sw ${}, 0x{:04X}(${})", cpu_register_names[disasm.rt], disasm.imm, cpu_register_names[disasm.rs]);
-  });
+    SetDisassembleFunction(0x20, [](const Disassembler& disasm) {
+        return format("add ${}, ${}, ${}", cpu_register_names[disasm.rd], cpu_register_names[disasm.rs], disasm.rt);
+    });
+
+    SetDisassembleFunction(0x2B, [](const Disassembler& disasm) {
+        return format("sw ${}, 0x{:04X}(${})", cpu_register_names[disasm.rt], disasm.imm, cpu_register_names[disasm.rs]);
+    });
 }
 
 void Disassembler::SetDisassembleFunction(std::uint8_t opcode, DisassembleFunction func) {

@@ -13,6 +13,7 @@ void interpreter_extended(Cpu *cpu, std::uint32_t opcode);
 
 void interpreter_sll(Cpu *cpu, std::uint32_t opcode);
 
+void interpreter_addiu(Cpu *cpu, std::uint32_t opcode);
 void interpreter_lui(Cpu *cpu, std::uint32_t opcode);
 void interpreter_ori(Cpu *cpu, std::uint32_t opcode);
 void interpreter_sw(Cpu *cpu, std::uint32_t opcode);

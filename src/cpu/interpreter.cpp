@@ -18,9 +18,17 @@ void interpreter_setup(Cpu *cpu)
     std::fill(std::begin(cpu->cop0_opcodes), std::end(cpu->cop0_opcodes), &Cpu::unknown_cop0_opcode);
 
     cpu->opcodes[0x00] = &interpreter_extended;
+    cpu->opcodes[0x09] = &interpreter_addiu;
     cpu->opcodes[0x0D] = &interpreter_ori;
     cpu->opcodes[0x0F] = &interpreter_lui;
     cpu->opcodes[0x2B] = &interpreter_sw;
+
+    // ADDIU
+    cpu->opcodes[0x09] = [](Cpu *cpu, std::uint32_t opcode) {
+        cpu->registers[rt] = cpu->registers[rs] + simm;
+        cpu->pc = cpu->next_pc;
+        cpu->next_pc += 4;
+    };
 
     cpu->extended_opcodes[0x00] = &interpreter_sll;
 }
@@ -40,6 +48,13 @@ void interpreter_extended(Cpu *cpu, std::uint32_t opcode)
 void interpreter_sll(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rd] = cpu->registers[rt] << shift;
+    cpu->pc = cpu->next_pc;
+    cpu->next_pc += 4;
+}
+
+void interpreter_addiu(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->registers[rt] = cpu->registers[rs] + simm;
     cpu->pc = cpu->next_pc;
     cpu->next_pc += 4;
 }
