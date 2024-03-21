@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#define MEMORY_RANGE(start, end) \
+    if (address >= (start) && address <= (end))
+
 enum class BusMode
 {
 	Ranged,

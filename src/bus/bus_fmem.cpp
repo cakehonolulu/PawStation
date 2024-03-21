@@ -87,10 +87,30 @@ void Bus::fmem_write32(std::uint32_t address, std::uint32_t value) {
     }
     else
     {
-        // Handle other cases or throw an exception if needed
-        std::ostringstream logMessage;
-        logMessage << "[BUS] 32-bit write to unknown address: 0x" << format("{:08X}", address);
-        Logger::Instance().Error(logMessage.str());
-        Pawstation::exit_();
+        MEMORY_RANGE(0x1F801000, 0x1F801024)
+        {
+            switch (address & 0x000000FF)
+            {
+                // 0x1F801010 - BIOS ROM Delay/Size
+                case 0x10:
+                    Logger::Instance().Warn("[BUS] Write to BIOS ROM Delay/Size MEMORY_CONTROL register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
+                default:
+                    std::ostringstream logMessage;
+                    logMessage << "[BUS] Unknown 32-bit write to MEMORY_CONTROL register: 0x" << format("{:08X}", address);
+                    Logger::Instance().Log(logMessage.str());
+                    Pawstation::exit_();
+                    break;
+            }
+        }
+        else
+        {
+            // Handle other cases or throw an exception if needed
+            std::ostringstream logMessage;
+            logMessage << "[BUS] 32-bit write to unknown address: 0x" << format("{:08X}", address);
+            Logger::Instance().Error(logMessage.str());
+            Pawstation::exit_();
+        }
     }
 }
