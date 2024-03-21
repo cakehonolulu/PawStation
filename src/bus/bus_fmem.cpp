@@ -148,6 +148,10 @@ void Bus::fmem_write32(std::uint32_t address, std::uint32_t value) {
         {
             Logger::Instance().Warn("[BUS] Write to RAM_SIZE register (Value: 0x" + format("{:08X}", value) + ")");
         }
+        else MEMORY_RANGE(0xFFFE0130, 0xFFFE0134)
+        {
+            Logger::Instance().Warn("[BUS] Write to CACHE_CONTROL register (Value: 0x" + format("{:08X}", value) + ")");
+        }
         else
         {
             // Handle other cases or throw an exception if needed
