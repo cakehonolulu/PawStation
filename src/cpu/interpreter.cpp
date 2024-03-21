@@ -26,6 +26,7 @@ void step_interpreter(Cpu *cpu)
 {
 	std::uint32_t opcode = cpu->fetch_opcode();
     cpu->parse_opcode(opcode);
+    cpu->registers[0] = 0;
 }
 
 void interpreter_lui(Cpu *cpu, std::uint32_t opcode)
