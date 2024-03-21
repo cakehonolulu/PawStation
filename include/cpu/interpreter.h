@@ -22,6 +22,7 @@ void interpreter_or(Cpu *cpu, std::uint32_t opcode);
 // Regular Opcodes
 void interpreter_j(Cpu *cpu, std::uint32_t opcode);
 void interpreter_bne(Cpu *cpu, std::uint32_t opcode);
+void interpreter_addi(Cpu *cpu, std::uint32_t opcode);
 void interpreter_addiu(Cpu *cpu, std::uint32_t opcode);
 void interpreter_lui(Cpu *cpu, std::uint32_t opcode);
 void interpreter_ori(Cpu *cpu, std::uint32_t opcode);
