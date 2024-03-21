@@ -75,7 +75,7 @@ void Cpu::unknown_opcode(std::uint32_t opcode)
 {
     std::ostringstream logMessage;
     logMessage << "[CPU] Unimplemented opcode: 0x" << format("{:04X}", opcode)
-               << " (Function bits: 0x" << format("{:02X}", (opcode >> 26) & 0x3F) << ")";
+               << " (Function bits: 0x" << format("{:02X}", subfunc) << ")";
 
     Logger::Instance().Error(logMessage.str());
     Pawstation::exit_();
@@ -85,7 +85,7 @@ void Cpu::unknown_extended_opcode(std::uint32_t opcode)
 {
     std::ostringstream logMessage;
     logMessage << "[CPU] Unimplemented extended opcode: 0x" << format("{:04X}", opcode) << " (Function bits: 0x"
-	          << format("{:02X}", (opcode >> 26) & 0x3F) << ")";
+	          << format("{:02X}", subfunc) << ")";
     Logger::Instance().Error(logMessage.str());
     Pawstation::exit_();
 }
@@ -94,7 +94,7 @@ void Cpu::unknown_cop0_opcode(std::uint32_t opcode)
 {
     std::ostringstream logMessage;
     logMessage << "[CPU] Unimplemented COP0 opcode: 0x" << format("{:04X}", opcode) << " (Function bits: 0x"
-	          << format("{:02X}", (opcode >> 26) & 0x3F) << ")";
+	          << format("{:02X}", subfunc) << ")";
     Logger::Instance().Error(logMessage.str());
     Pawstation::exit_();
 }

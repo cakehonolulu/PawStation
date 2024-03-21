@@ -6,10 +6,14 @@
 #include <cpu/registers.h>
 #include <functional>
 
-#define rt ((opcode >> 16) & 0x1F)
 #define rs ((opcode >> 21) & 0x1F)
+#define rt ((opcode >> 16) & 0x1F)
+#define rd ((opcode >> 11) & 0x1F)
+
 #define imm (opcode & 0xFFFF)
 #define simm (std::uint32_t ((std::int16_t) imm))
+#define subfunc (opcode & 0x3F)
+#define shift ((std::uint32_t) ((opcode >> 6) & 0x1F))
 
 enum class EmulationMode
 {

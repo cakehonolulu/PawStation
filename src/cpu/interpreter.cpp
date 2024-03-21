@@ -17,9 +17,12 @@ void interpreter_setup(Cpu *cpu)
     std::fill(std::begin(cpu->extended_opcodes), std::end(cpu->extended_opcodes), &Cpu::unknown_extended_opcode);
     std::fill(std::begin(cpu->cop0_opcodes), std::end(cpu->cop0_opcodes), &Cpu::unknown_cop0_opcode);
 
+    cpu->opcodes[0x00] = &interpreter_extended;
     cpu->opcodes[0x0D] = &interpreter_ori;
     cpu->opcodes[0x0F] = &interpreter_lui;
     cpu->opcodes[0x2B] = &interpreter_sw;
+
+    cpu->extended_opcodes[0x00] = &interpreter_sll;
 }
 
 void step_interpreter(Cpu *cpu)
@@ -27,6 +30,18 @@ void step_interpreter(Cpu *cpu)
 	std::uint32_t opcode = cpu->fetch_opcode();
     cpu->parse_opcode(opcode);
     cpu->registers[0] = 0;
+}
+
+void interpreter_extended(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->extended_opcodes[subfunc](cpu, opcode);
+}
+
+void interpreter_sll(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->registers[rd] = cpu->registers[rt] << shift;
+    cpu->pc = cpu->next_pc;
+    cpu->next_pc += 4;
 }
 
 void interpreter_lui(Cpu *cpu, std::uint32_t opcode)
