@@ -37,7 +37,7 @@ Cpu::Cpu(Bus *bus_, EmulationMode mode)
 	std::memset(registers, 0, sizeof(registers));
     std::memset(cop0_registers, 0, sizeof(cop0_registers));
 	pc = 0xBFC00000;
-	next_pc = pc + 4;
+	next_opcode = 0x00000000;
 }
 
 Cpu::~Cpu()
@@ -49,7 +49,7 @@ void Cpu::reset()
     std::memset(registers, 0, sizeof(registers));
     std::memset(cop0_registers, 0, sizeof(cop0_registers));
     pc = 0xBFC00000;
-    next_pc = pc + 4;
+    next_opcode = 0x00000000;
 }
 
 void Cpu::run()

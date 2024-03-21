@@ -10,13 +10,13 @@ class Disassembler {
 public:
   using DisassembleFunction = std::function<std::string(const Disassembler&)>;
 
-  Disassembler();
+  Disassembler(std::uint32_t pc = 0);
 
   // Set a custom disassembly function for a specific opcode
   void SetDisassembleFunction(std::uint8_t opcode, DisassembleFunction func);
 
   // Disassemble an opcode
-  std::string Disassemble(std::uint32_t opcode);
+  std::string Disassemble(std::uint32_t opcode, std::uint32_t pc);
 
 private:
   std::uint8_t rs;
@@ -26,6 +26,8 @@ private:
   std::uint32_t simm;
   std::uint16_t subfunc;
   std::uint32_t shift;
+  std::uint32_t jimm;
+  std::uint32_t pc_;
 
   std::unordered_map<std::uint8_t, DisassembleFunction> opcodeFunctions;
 };

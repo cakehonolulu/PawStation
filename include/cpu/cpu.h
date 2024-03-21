@@ -15,6 +15,8 @@
 #define subfunc (opcode & 0x3F)
 #define shift ((std::uint32_t) ((opcode >> 6) & 0x1F))
 
+#define jimm ((std::uint32_t) (opcode & 0x3FFFFFF))
+
 enum class EmulationMode
 {
 	Interpreter,
@@ -49,5 +51,6 @@ public:
 	std::uint32_t cop0_registers[32];
 
 	std::uint32_t pc;
-	std::uint32_t next_pc;
+
+    std::uint32_t next_opcode;
 };

@@ -18,6 +18,7 @@ void interpreter_setup(Cpu *cpu)
     std::fill(std::begin(cpu->cop0_opcodes), std::end(cpu->cop0_opcodes), &Cpu::unknown_cop0_opcode);
 
     cpu->opcodes[0x00] = &interpreter_extended;
+    cpu->opcodes[0x02] = &interpreter_j;
     cpu->opcodes[0x09] = &interpreter_addiu;
     cpu->opcodes[0x0D] = &interpreter_ori;
     cpu->opcodes[0x0F] = &interpreter_lui;
@@ -28,7 +29,10 @@ void interpreter_setup(Cpu *cpu)
 
 void step_interpreter(Cpu *cpu)
 {
-	std::uint32_t opcode = cpu->fetch_opcode();
+    std::uint32_t opcode = cpu->next_opcode;
+    cpu->next_opcode = cpu->fetch_opcode();
+
+    cpu->pc += 4;
     cpu->parse_opcode(opcode);
     cpu->registers[0] = 0;
 }
@@ -41,34 +45,29 @@ void interpreter_extended(Cpu *cpu, std::uint32_t opcode)
 void interpreter_sll(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rd] = cpu->registers[rt] << shift;
-    cpu->pc = cpu->next_pc;
-    cpu->next_pc += 4;
+}
+
+void interpreter_j(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->pc = (cpu->pc & 0xF0000000) | (jimm << 2);
 }
 
 void interpreter_addiu(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rt] = cpu->registers[rs] + simm;
-    cpu->pc = cpu->next_pc;
-    cpu->next_pc += 4;
 }
 
 void interpreter_lui(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rt] = imm << 16;
-    cpu->pc = cpu->next_pc;
-    cpu->next_pc += 4;
 }
 
 void interpreter_ori(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rt] = cpu->registers[rs] | imm;
-    cpu->pc = cpu->next_pc;
-    cpu->next_pc += 4;
 }
 
 void interpreter_sw(Cpu *cpu, std::uint32_t opcode)
 {
   cpu->bus->write32(cpu->registers[rs] + simm, cpu->registers[rt]);
-  cpu->pc = cpu->next_pc;
-  cpu->next_pc += 4;
 }
