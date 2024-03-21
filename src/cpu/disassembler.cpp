@@ -10,7 +10,17 @@ using fmt::format;
 #endif
 
 Disassembler::Disassembler() {
-  // Set default disassembly functions
+    SetDisassembleFunction(0x00, [](const Disassembler& disasm) {
+        {
+            switch (disasm.subfunc) {
+                case 0x00:
+                    return format("sll ${}, ${}, {}", cpu_register_names[disasm.rd], cpu_register_names[disasm.rt], disasm.imm);
+                default:
+                    return format("UNKNOWN_SUBFUNCTION 0x{:02X}", disasm.subfunc);
+            }
+        }
+    });
+
   SetDisassembleFunction(0x0F, [](const Disassembler& disasm) {
     return format("lui ${}, 0x{:04X}", cpu_register_names[disasm.rt], disasm.imm);
   });
@@ -33,21 +43,37 @@ void Disassembler::SetDisassembleFunction(std::uint8_t opcode, DisassembleFuncti
 }
 
 std::string Disassembler::Disassemble(std::uint32_t opcode) {
-  std::uint8_t opcodeKey = (opcode >> 26) & 0x3F; // Extract opcode key from the opcode
-  auto it = opcodeFunctions.find(opcodeKey);
+    std::uint8_t opcodeKey = (opcode >> 26) & 0x3F;
+    auto it = opcodeFunctions.find(opcodeKey);
 
-  if (it != opcodeFunctions.end()) {
-    // Extract relevant fields from the opcode
-    Disassembler disasm;
-    disasm.rs = (opcode >> 21) & 0x1F;
-    disasm.rt = (opcode >> 16) & 0x1F;
-    disasm.rd = (opcode >> 11) & 0x1F;
-    disasm.imm = opcode & 0xFFFF;
+    if (it != opcodeFunctions.end()) {
+        Disassembler disasm;
+        disasm.rs = ((opcode >> 21) & 0x1F);
+        disasm.rt = ((opcode >> 16) & 0x1F);
+        disasm.rd = ((opcode >> 11) & 0x1F);
+        disasm.imm = (opcode & 0xFFFF);
+        disasm.simm = (std::uint32_t ((std::int16_t) imm));
+        disasm.subfunc = (opcode & 0x3F);
+        disasm.shift = ((std::uint32_t) ((opcode >> 6) & 0x1F));
 
-    // Call the registered disassembly function
-    return it->second(disasm);
-  } else {
-    // Handle unknown opcode
-    return format("UNKNOWN_OPCODE 0x{:08X}", opcode);
-  }
+        return it->second(disasm);
+    } else {
+        std::uint8_t extendedOpcodeKey = opcode & 0xFF;
+        auto extendedIt = opcodeFunctions.find(extendedOpcodeKey);
+
+        Disassembler disasm;
+        disasm.rs = ((opcode >> 21) & 0x1F);
+        disasm.rt = ((opcode >> 16) & 0x1F);
+        disasm.rd = ((opcode >> 11) & 0x1F);
+        disasm.imm = (opcode & 0xFFFF);
+        disasm.simm = (std::uint32_t ((std::int16_t) imm));
+        disasm.subfunc = (opcode & 0x3F);
+        disasm.shift = ((std::uint32_t) ((opcode >> 6) & 0x1F));
+
+        if (extendedIt != opcodeFunctions.end()) {
+            return extendedIt->second(disasm);
+        } else {
+            return format("UNKNOWN_OPCODE 0x{:08X}", opcode);
+        }
+    }
 }

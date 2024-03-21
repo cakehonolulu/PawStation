@@ -23,6 +23,9 @@ private:
   std::uint8_t rt;
   std::uint8_t rd;
   std::uint16_t imm;
+  std::uint32_t simm;
+  std::uint16_t subfunc;
+  std::uint32_t shift;
 
   std::unordered_map<std::uint8_t, DisassembleFunction> opcodeFunctions;
 };
