@@ -13,10 +13,15 @@ namespace ImGuiLogger
         ImGuiLogBuffer.push_back({message, LogLevel::Error});
     }
 
+    void ImGuiWarnFunction(const std::string& message) {
+        ImGuiLogBuffer.push_back({message, LogLevel::Warning});
+    }
+
     void InitializeImGuiLogger()
     {
         Logger::Instance().SetLogFunction(ImGuiLogFunction);
         Logger::Instance().SetErrorFunction(ImGuiErrorFunction);
+        Logger::Instance().SetWarnFunction(ImGuiWarnFunction);
     }
 
     const std::vector<std::pair<std::string, LogLevel>>& GetImGuiLogBuffer()

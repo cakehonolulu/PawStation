@@ -32,6 +32,11 @@ public:
         error = std::move(customErrorFunction);
     }
 
+    void SetWarnFunction(std::function<void(const std::string&)> customWarnFunction)
+    {
+        warn = std::move(customWarnFunction);
+    }
+
     void Log(const std::string& message)
     {
         if (log)
@@ -56,7 +61,20 @@ public:
         }
     }
 
+    void Warn(const std::string& message)
+    {
+        if (warn)
+        {
+            warn(message);
+        }
+        else
+        {
+            std::cout << BOLDYELLOW <<  message << RESET << std::endl;
+        }
+    }
+
 private:
     std::function<void(const std::string&)> log;
     std::function<void(const std::string&)> error;
+    std::function<void(const std::string&)> warn;
 };

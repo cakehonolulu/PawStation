@@ -211,11 +211,13 @@ void ImGuiPawstation::run()
             ImGui::Begin("Log Messages");
 
             for (const auto& logEntry : logMessages) {
-                const std::string& message = logEntry.first;
+                const std::string &message = logEntry.first;
                 LogLevel level = logEntry.second;
 
                 if (level == LogLevel::Error) {
                     ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", message.c_str());
+                } else if (level == LogLevel::Warning) {
+                    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "%s", message.c_str());
                 } else {
                     ImGui::TextUnformatted(message.c_str());
                 }
