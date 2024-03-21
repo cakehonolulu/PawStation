@@ -31,6 +31,7 @@ void interpreter_setup(Cpu *cpu)
     cpu->opcodes[0x09] = &interpreter_addiu;
     cpu->opcodes[0x0D] = &interpreter_ori;
     cpu->opcodes[0x0F] = &interpreter_lui;
+    cpu->opcodes[0x23] = &interpreter_lw;
     cpu->opcodes[0x2B] = &interpreter_sw;
 }
 
@@ -103,6 +104,11 @@ void interpreter_lui(Cpu *cpu, std::uint32_t opcode)
 void interpreter_ori(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rt] = cpu->registers[rs] | imm;
+}
+
+void interpreter_lw(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->registers[rt] = cpu->bus->read32(cpu->registers[rs] + simm);
 }
 
 void interpreter_sw(Cpu *cpu, std::uint32_t opcode)
