@@ -91,15 +91,55 @@ void Bus::fmem_write32(std::uint32_t address, std::uint32_t value) {
         {
             switch (address & 0x000000FF)
             {
+                // 0x1F801000 - Expansion 1 Base Address
+                case 0x00:
+                    Logger::Instance().Warn("[BUS] Write to Expansion 1 Base Address register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
+                // 0x1F801004 - Expansion 2 Base Address
+                case 0x04:
+                    Logger::Instance().Warn("[BUS] Write to Expansion 2 Base Address register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
+                // 0x1F801008 - Expansion 1 Delay/Size
+                case 0x08:
+                    Logger::Instance().Warn("[BUS] Write to Expansion 1 Delay/Size register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
+                // 0x1F80100C - Expansion 3 Delay/Size
+                case 0x0C:
+                    Logger::Instance().Warn("[BUS] Write to Expansion 3 Delay/Size register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
                 // 0x1F801010 - BIOS ROM Delay/Size
                 case 0x10:
                     Logger::Instance().Warn("[BUS] Write to BIOS ROM Delay/Size register (Value: 0x" + format("{:08X}", value) + ")");
                     break;
 
+                // 0x1F801014 - SPU Delay/Size
+                case 0x14:
+                    Logger::Instance().Warn("[BUS] Write to SPU Delay/Size register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
+                // 0x1F801018 - CDROM Delay/Size
+                case 0x18:
+                    Logger::Instance().Warn("[BUS] Write to CDROM Delay/Size register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
+                // 0x1F80101C - Expansion 2 Delay/Size
+                case 0x1C:
+                    Logger::Instance().Warn("[BUS] Write to Expansion 2 Delay/Size register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
+                // 0x1F801020 - COM_DELAY / COMMON_DELAY register
+                case 0x20:
+                    Logger::Instance().Warn("[BUS] Write to COM_DELAY register (Value: 0x" + format("{:08X}", value) + ")");
+                    break;
+
                 default:
                     std::ostringstream logMessage;
                     logMessage << "[BUS] Unknown 32-bit write to MEMORY_CONTROL register: 0x" << format("{:08X}", address);
-                    Logger::Instance().Log(logMessage.str());
+                    Logger::Instance().Error(logMessage.str());
                     Pawstation::exit_();
                     break;
             }
