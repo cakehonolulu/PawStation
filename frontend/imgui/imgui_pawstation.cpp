@@ -275,7 +275,6 @@ void ImGuiPawstation::run()
             // Display other relevant information as needed
             ImGui::Separator();
             ImGui::Text("Program Counter (PC): 0x%08X", cpu->pc);
-            ImGui::Text("Next Program Counter (Next PC): 0x%08X", cpu->next_pc);
 
             ImGui::End();
         }
@@ -391,7 +390,7 @@ void imgui_disassembly_window(Cpu *cpu, Bus *bus)
 
             // Disassemble the instruction at the current address
             std::uint32_t opcode = bus->read32(address);
-            std::string disassembly = disassembler.Disassemble(opcode);
+            std::string disassembly = disassembler.Disassemble(opcode, cpu->pc);
 
             // Highlight the current instruction
             bool isCurrentInstruction = (address == cpu->pc);

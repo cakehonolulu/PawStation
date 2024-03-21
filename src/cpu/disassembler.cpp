@@ -9,7 +9,7 @@ using std::format;
 using fmt::format;
 #endif
 
-Disassembler::Disassembler() {
+Disassembler::Disassembler(std::uint32_t pc) : pc_(pc) {
     SetDisassembleFunction(0x00, [](const Disassembler& disasm) {
         {
             switch (disasm.subfunc) {
@@ -19,6 +19,10 @@ Disassembler::Disassembler() {
                     return format("UNKNOWN_SUBFUNCTION 0x{:02X}", disasm.subfunc);
             }
         }
+    });
+
+    SetDisassembleFunction(0x02, [](const Disassembler& disasm) {
+        return format("j 0x{:08X}",  (disasm.pc_ & 0xF0000000) | (disasm.jimm << 2));
     });
 
     SetDisassembleFunction(0x09, [](const Disassembler& disasm) {
@@ -46,12 +50,13 @@ void Disassembler::SetDisassembleFunction(std::uint8_t opcode, DisassembleFuncti
   opcodeFunctions[opcode] = func;
 }
 
-std::string Disassembler::Disassemble(std::uint32_t opcode) {
+std::string Disassembler::Disassemble(std::uint32_t opcode, std::uint32_t pc) {
     std::uint8_t opcodeKey = (opcode >> 26) & 0x3F;
     auto it = opcodeFunctions.find(opcodeKey);
 
     if (it != opcodeFunctions.end()) {
         Disassembler disasm;
+        disasm.pc_ = pc;
         disasm.rs = ((opcode >> 21) & 0x1F);
         disasm.rt = ((opcode >> 16) & 0x1F);
         disasm.rd = ((opcode >> 11) & 0x1F);
@@ -59,6 +64,7 @@ std::string Disassembler::Disassemble(std::uint32_t opcode) {
         disasm.simm = (std::uint32_t ((std::int16_t) imm));
         disasm.subfunc = (opcode & 0x3F);
         disasm.shift = ((std::uint32_t) ((opcode >> 6) & 0x1F));
+        disasm.jimm = ((std::uint32_t) (opcode & 0x3FFFFFF));
 
         return it->second(disasm);
     } else {
@@ -66,6 +72,7 @@ std::string Disassembler::Disassemble(std::uint32_t opcode) {
         auto extendedIt = opcodeFunctions.find(extendedOpcodeKey);
 
         Disassembler disasm;
+        disasm.pc_ = pc;
         disasm.rs = ((opcode >> 21) & 0x1F);
         disasm.rt = ((opcode >> 16) & 0x1F);
         disasm.rd = ((opcode >> 11) & 0x1F);
@@ -73,6 +80,7 @@ std::string Disassembler::Disassemble(std::uint32_t opcode) {
         disasm.simm = (std::uint32_t ((std::int16_t) imm));
         disasm.subfunc = (opcode & 0x3F);
         disasm.shift = ((std::uint32_t) ((opcode >> 6) & 0x1F));
+        disasm.jimm = ((std::uint32_t) (opcode & 0x3FFFFFF));
 
         if (extendedIt != opcodeFunctions.end()) {
             return extendedIt->second(disasm);
