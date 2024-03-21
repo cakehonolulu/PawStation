@@ -15,6 +15,8 @@ Disassembler::Disassembler(std::uint32_t pc) : pc_(pc) {
             switch (disasm.subfunc) {
                 case 0x00:
                     return format("sll ${}, ${}, {}", cpu_register_names[disasm.rd], cpu_register_names[disasm.rt], disasm.imm);
+                case 0x25:
+                    return format("or ${}, ${}, ${}", cpu_register_names[disasm.rd], cpu_register_names[disasm.rs], cpu_register_names[disasm.rt]);
                 default:
                     return format("UNKNOWN_SUBFUNCTION 0x{:02X}", disasm.subfunc);
             }

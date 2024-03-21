@@ -25,6 +25,7 @@ void interpreter_setup(Cpu *cpu)
     cpu->opcodes[0x2B] = &interpreter_sw;
 
     cpu->extended_opcodes[0x00] = &interpreter_sll;
+    cpu->extended_opcodes[0x25] = &interpreter_or;
 }
 
 void step_interpreter(Cpu *cpu)
@@ -45,6 +46,11 @@ void interpreter_extended(Cpu *cpu, std::uint32_t opcode)
 void interpreter_sll(Cpu *cpu, std::uint32_t opcode)
 {
     cpu->registers[rd] = cpu->registers[rt] << shift;
+}
+
+void interpreter_or(Cpu *cpu, std::uint32_t opcode)
+{
+    cpu->registers[rd] = cpu->registers[rs] | cpu->registers[rt];
 }
 
 void interpreter_j(Cpu *cpu, std::uint32_t opcode)

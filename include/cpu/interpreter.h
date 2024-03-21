@@ -12,6 +12,7 @@ void interpreter_setup(Cpu *cpu);
 void interpreter_extended(Cpu *cpu, std::uint32_t opcode);
 
 void interpreter_sll(Cpu *cpu, std::uint32_t opcode);
+void interpreter_or(Cpu *cpu, std::uint32_t opcode);
 
 void interpreter_j(Cpu *cpu, std::uint32_t opcode);
 void interpreter_addiu(Cpu *cpu, std::uint32_t opcode);
