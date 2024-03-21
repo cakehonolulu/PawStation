@@ -9,7 +9,7 @@
 #define rt ((opcode >> 16) & 0x1F)
 #define rs ((opcode >> 21) & 0x1F)
 #define imm (opcode & 0xFFFF)
-#define simm ((std::int16_t) imm)
+#define simm (std::uint32_t ((std::int16_t) imm))
 
 enum class EmulationMode
 {
