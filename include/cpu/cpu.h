@@ -13,7 +13,7 @@
 #define imm (opcode & 0xFFFF)
 #define simm (std::uint32_t ((std::int16_t) imm))
 #define subfunc (opcode & 0x3F)
-#define shift ((std::uint32_t) ((opcode >> 6) & 0x1F))
+#define shft ((std::uint32_t) ((opcode >> 6) & 0x1F))
 
 #define jimm ((std::uint32_t) (opcode & 0x3FFFFFF))
 

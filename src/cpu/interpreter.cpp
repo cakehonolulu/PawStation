@@ -64,7 +64,7 @@ void interpreter_mtc0(Cpu *cpu, std::uint32_t opcode)
 // Extended Opcodes
 void interpreter_sll(Cpu *cpu, std::uint32_t opcode)
 {
-    cpu->registers[rd] = cpu->registers[rt] << shift;
+    cpu->registers[rd] = cpu->registers[rt] << shft;
 }
 
 void interpreter_or(Cpu *cpu, std::uint32_t opcode)
