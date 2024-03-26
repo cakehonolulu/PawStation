@@ -40,6 +40,8 @@ void step_interpreter(Cpu *cpu)
     std::uint32_t opcode = cpu->next_opcode;
     cpu->next_opcode = cpu->fetch_opcode();
 
+    cpu->update_registers();
+
     cpu->pc += 4;
     cpu->parse_opcode(opcode);
     cpu->registers[0] = 0;
@@ -108,10 +110,23 @@ void interpreter_ori(Cpu *cpu, std::uint32_t opcode)
 
 void interpreter_lw(Cpu *cpu, std::uint32_t opcode)
 {
-    cpu->registers[rt] = cpu->bus->read32(cpu->registers[rs] + simm);
+  if ((sr & 0x10000) != 0) {
+    Logger::Instance().Warn("[CPU] Cache isolate bit ON, ignoring memory read...");
+    return;
+  }
+
+  cpu->shadow_registers[rt] = cpu->bus->read32(cpu->registers[rs] + simm);
+
+  // Mark shadow registers as valid
+  cpu->shadow_valid = true;
 }
 
 void interpreter_sw(Cpu *cpu, std::uint32_t opcode)
 {
+  if ((sr & 0x10000) != 0) {
+    Logger::Instance().Warn("[CPU] Cache isolate bit ON, ignoring memory read...");
+    return;
+  }
+
   cpu->bus->write32(cpu->registers[rs] + simm, cpu->registers[rt]);
 }
